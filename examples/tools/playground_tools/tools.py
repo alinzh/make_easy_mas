@@ -1,5 +1,6 @@
 from langchain.tools import tool
 
+
 @tool
 def web_search(query: str) -> str:
     """web-search"""
