@@ -1,7 +1,7 @@
 [project]
 name = "bootcamp2025spb-make-mas"
 version = "0.1.0"
-description = "Add your description here"
+description = "Examples from the Open Source BootCamp 2025"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
