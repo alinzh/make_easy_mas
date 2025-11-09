@@ -34,17 +34,19 @@ def convert_to_markdown(file_path: str) -> str:
 
 tools = [convert_to_markdown]
 
-llm = ChatOpenAI(model=BASE_MODEL, base_url=BASE_URL, temperature=0)  # type: ignore
+llm = ChatOpenAI(model=BASE_MODEL, base_url=BASE_URL, temperature=0)
 
 graph = create_agent(llm, tools)
 
 
 if __name__ == "__main__":
-    test_pdf_path = Path(__file__).parent / "test.pdf"
+    test_pdf = Path(__file__).parent / "test.pdf"
 
-    result = graph.invoke(f"Прочитай файл и расскажи что в нем {test_pdf_path}")
+    result = graph.invoke(
+        f"Analyze the document at {test_pdf} and tell me what it contains"
+    )
 
-    print("\nResult:")
+    print("Result:")
     for message in result["messages"]:
         if hasattr(message, "content") and message.content:
             print(f"{message.type}: {message.content}")
