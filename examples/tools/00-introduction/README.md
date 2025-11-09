@@ -4,4 +4,4 @@
 
 ## How to use it?
 
-We gonna create several advanced tool by using python libraries and integrate them into Agents.
+We gonna create several useful tools by using python libraries and integrate them into Agents.
