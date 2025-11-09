@@ -3,7 +3,7 @@ name = "bootcamp2025spb-make-mas"
 version = "0.1.0"
 description = "Examples from the Open Source BootCamp 2025"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "langchain>=1.0.5",
     "langchain-core>=1.0.4",
