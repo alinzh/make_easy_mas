@@ -1,13 +1,16 @@
 import os
-from typing import TypedDict, List, Optional, Dict, Any
+from typing import Dict, Any
 from langgraph.graph import StateGraph, START, END
-from langchain_core.messages import AnyMessage, HumanMessage, AIMessage, SystemMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from state import State
 from langchain_openai import ChatOpenAI
-from langchain.tools import tool
+from tools.playground_tools.tools import web_search, calc
+from prompts import supervisor_system_prompt, summary_system_prompt, validator_system_prompt, planner_system_prompt
 from langchain.agents import create_agent 
 from dotenv import load_dotenv
 
 load_dotenv(".env")
+
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 MODEL_PLANNER     = "google/gemini-2.0-flash-lite-001"
@@ -15,6 +18,7 @@ MODEL_SUPERVISOR  = "google/gemini-2.0-flash-lite-001"   # model supporting tool
 MODEL_VALIDATOR   = "google/gemini-2.0-flash-lite-001"
 MODEL_SUMMARIZER  = "google/gemini-2.0-flash-lite-001"
 
+TOOLS = [web_search, calc]
 
 def make_openrouter_llm(model: str, temperature: float = 0.0) -> ChatOpenAI:
     return ChatOpenAI(
@@ -24,49 +28,20 @@ def make_openrouter_llm(model: str, temperature: float = 0.0) -> ChatOpenAI:
         temperature=temperature,
     )
 
-
-class State(TypedDict):
-    messages: List[AnyMessage]
-    plan: Optional[List[str]]
-    draft: Optional[str]
-    validated: Optional[bool]
-    summary: Optional[str]
-
-
-@tool
-def web_search(query: str) -> str:
-    """web-search"""
-    return f"[mock] search results for: {query}"
-
-
-@tool
-def calc(expr: str) -> str:
-    """calculator"""
-    try:
-        return str(eval(expr, {"__builtins__": {}}))
-    except Exception as e:
-        return f"calc error: {e}"
-
-
-TOOLS = [web_search, calc]
-
-
-planner_llm   = make_openrouter_llm(MODEL_PLANNER, temperature=0.0)
-supervisor_llm= make_openrouter_llm(MODEL_SUPERVISOR, temperature=0.0)
+planner_llm = make_openrouter_llm(MODEL_PLANNER, temperature=0.0)
+supervisor_llm = make_openrouter_llm(MODEL_SUPERVISOR, temperature=0.0)
 validator_llm = make_openrouter_llm(MODEL_VALIDATOR, temperature=0.0)
 summarizer_llm= make_openrouter_llm(MODEL_SUMMARIZER, temperature=0.3)
 
-
-simple_system_prompt = "you are a helpful ai assistant. you must use the following tools to answer questions."
 supervisor_agent_graph = create_agent(
     model=supervisor_llm,
     tools=TOOLS,
-    system_prompt=simple_system_prompt
+    system_prompt=supervisor_system_prompt
 )
 
 
 def planner_node(state: State) -> Dict[str, Any]:
-    sys = SystemMessage(content="you are the planner. provide a brief plan (3–6 steps) to solve the task. do not solve it.")
+    sys = SystemMessage(content=planner_system_prompt)
     res = planner_llm.invoke([sys] + state["messages"])
     steps = [s.strip("- •").strip() for s in (res.content or "").split("\n") if s.strip()]
     return {"messages": state["messages"] + [res], "plan": steps[:8] or None}
@@ -101,7 +76,7 @@ def supervisor_node(state: State) -> Dict[str, Any]:
 
 def validator_node(state: State) -> Dict[str, Any]:
     draft = state.get("draft") or ""
-    sys = SystemMessage(content="you are the validator. reply with json: {valid: bool, comment: str}.")
+    sys = SystemMessage(content=validator_system_prompt)
     ai = validator_llm.invoke([sys, HumanMessage(content=draft)])
     valid = "true" in (ai.content or "").lower()
     return {"messages": state["messages"] + [AIMessage(content=f"[validator] {ai.content}")],
@@ -110,7 +85,7 @@ def validator_node(state: State) -> Dict[str, Any]:
 
 def summarizer_node(state: State) -> Dict[str, Any]:
     history=str(state["messages"])
-    sys = SystemMessage(content=f"you are the summarizer. briefly summarize and provide the final answer. Text for summarization: {history}")
+    sys = SystemMessage(content=summary_system_prompt.format(history=history))
     ai = summarizer_llm.invoke([sys])
     return {"messages": state["messages"] + [AIMessage(content=f"[summary] {ai.content}")],
             "summary": ai.content}
