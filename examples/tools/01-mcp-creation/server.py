@@ -43,20 +43,12 @@ def analyze_document(file_path: str) -> str:
         lines = content.split("\n")
         words = len(content.split())
         chars = len(content)
-        headers = [line for line in lines if line.startswith("#")]
 
         return f"""Document: {Path(file_path).name}
 Size: {chars} chars, {words} words
-Lines: {len(lines)}
-Headers: {len(headers)}"""
+Lines: {len(lines)}"""
     except Exception as e:
         return f"analysis error: {str(e)}"
-
-
-@mcp.resource("config://version")
-def get_version():
-    """Get server version"""
-    return "1.0.0"
 
 
 if __name__ == "__main__":

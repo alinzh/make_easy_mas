@@ -11,12 +11,11 @@ load_dotenv()
 
 md = MarkItDown()
 BASE_MODEL = os.getenv("BASE_MODEL") or ""
-BASE_URL = os.getenv("BASE_URL") or "https://openrouter.ai/api/v1"
 
 
 @tool
 def convert_to_markdown(file_path: str) -> str:
-    """Convert document to Markdown text format.
+    """Extract text information from a document file into markdown format.
 
     Args:
         file_path: Path to document file (PDF, DOCX, XLSX, PPTX)
@@ -34,7 +33,7 @@ def convert_to_markdown(file_path: str) -> str:
 
 tools = [convert_to_markdown]
 
-llm = ChatOpenAI(model=BASE_MODEL, base_url=BASE_URL, temperature=0)
+llm = ChatOpenAI(model=BASE_MODEL, temperature=0)  # type: ignore
 
 graph = create_agent(llm, tools)
 
@@ -43,7 +42,14 @@ if __name__ == "__main__":
     test_pdf = Path(__file__).parent.parent.parent / "data" / "test.pdf"
 
     result = graph.invoke(
-        f"Analyze the document at {test_pdf} and tell me what it contains"
+        {
+            "messages": [
+                (
+                    "user",
+                    f"Analyze the document at {test_pdf} and tell me what it contains. Create an table .md .",
+                )
+            ]
+        }
     )
 
     print("Result:")
