@@ -18,12 +18,9 @@ def convert_document(file_path: str) -> str:
     Returns:
         Converted text content in Markdown format
     """
-    try:
-        expanded_path = os.path.expanduser(file_path)
-        result = md.convert(expanded_path)
-        return result.text_content
-    except Exception as e:
-        return f"conversion error: {str(e)}"
+    expanded_path = os.path.expanduser(file_path)
+    result = md.convert(expanded_path)
+    return result.text_content
 
 
 @mcp.tool
@@ -36,19 +33,16 @@ def analyze_document(file_path: str) -> str:
     Returns:
         Document statistics (word count, lines, headers)
     """
-    try:
-        expanded_path = os.path.expanduser(file_path)
-        content = md.convert(expanded_path).text_content
+    expanded_path = os.path.expanduser(file_path)
+    content = md.convert(expanded_path).text_content
 
-        lines = content.split("\n")
-        words = len(content.split())
-        chars = len(content)
+    lines = content.split("\n")
+    words = len(content.split())
+    chars = len(content)
 
-        return f"""Document: {Path(file_path).name}
+    return f"""Document: {Path(file_path).name}
 Size: {chars} chars, {words} words
 Lines: {len(lines)}"""
-    except Exception as e:
-        return f"analysis error: {str(e)}"
 
 
 if __name__ == "__main__":

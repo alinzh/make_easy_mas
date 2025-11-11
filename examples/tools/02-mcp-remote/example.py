@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from fastmcp import Client
-from fastmcp.client.transports import NpxStdioTransport
+from fastmcp.client.transports import StdioTransport
 from langchain.agents import create_agent
 from langchain_mcp_adapters.tools import load_mcp_tools
 from langchain_openai import ChatOpenAI
@@ -11,19 +11,10 @@ from langchain_openai import ChatOpenAI
 load_dotenv()
 
 BASE_MODEL = os.getenv("BASE_MODEL") or ""
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 
 async def main():
-    if not TAVILY_API_KEY:
-        print("Error: TAVILY_API_KEY not found in environment variables")
-        print("Get your API key from: https://tavily.com")
-        return
-
-    transport = NpxStdioTransport(
-        package="tavily-mcp@latest",
-        env_vars={"TAVILY_API_KEY": TAVILY_API_KEY},
-    )
+    transport = StdioTransport(command="uvx", args=["mcp-server-fetch"])
 
     async with Client(transport) as client:
         print("Available tools:")
@@ -38,10 +29,17 @@ async def main():
         agent = create_agent(llm, tools)
 
         response = await agent.ainvoke(
-            {"messages": [("user", "Last 10 news about AI")]}
+            {
+                "messages": [
+                    (
+                        "user",
+                        "Fetch the content from https://docs.langchain.com/oss/python/langgraph/overview and summarize key points",
+                    )
+                ]
+            }
         )
 
-        print("Agent response:")
+        print("\nAgent response:")
         for message in response["messages"]:
             if message.type == "ai" and hasattr(message, "content") and message.content:
                 print(f"\n{message.content}")

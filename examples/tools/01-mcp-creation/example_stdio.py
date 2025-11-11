@@ -14,7 +14,7 @@ BASE_MODEL = os.getenv("BASE_MODEL") or ""
 
 
 async def main():
-    server_script = Path(__file__).parent / "server.py"
+    server_script = Path(__file__).parent / "server_stdio.py"
 
     async with Client(str(server_script)) as client:
         print("Available tools:")
