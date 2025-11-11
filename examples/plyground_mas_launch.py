@@ -14,6 +14,7 @@ from mas_lib.prompts import (
 )
 from mas_lib.state import State
 from mas_lib.tools import calc, web_search
+from mas_lib.utils import create_mermaid_graph
 
 load_dotenv(".env")
 
@@ -113,5 +114,7 @@ if __name__ == "__main__":
         "summary": None,
     }
     state = app.invoke(init)
+    # save img
+    create_mermaid_graph(app)
 
     print("\n--- SUMMARY ---\n", state.get("summary"))

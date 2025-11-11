@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, BaseMessage
 from langgraph.graph import END, START, StateGraph
+from mas_lib.utils import create_mermaid_graph
 
 from mas_lib.prompts import (
     planner_system_prompt,
@@ -125,6 +126,7 @@ graph.add_conditional_edges("validator", validation_routing, {True: "summarizer"
 graph.add_edge("summarizer", END)
 
 app = graph.compile()
+create_mermaid_graph(app)
 
 if __name__ == "__main__":
     # query = 'Tell the story of ITMO University, using only confirmed information.'
