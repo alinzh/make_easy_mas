@@ -48,8 +48,8 @@
 
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/alinzh/bootCamp2025spb_make_mas.git
-cd bootCamp2025spb_make_mas
+git clone https://github.com/alinzh/make_easy_mas.git
+cd make_easy_mas
 
 # Создать виртуальное окружение
 python -m venv venv
@@ -69,5 +69,6 @@ cp .env.example .env
 ---
 
 ⭐ **Если этот репозиторий был полезен, поставьте звёздочку!**
+
 
 
