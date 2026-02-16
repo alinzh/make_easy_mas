@@ -10,7 +10,7 @@ from markitdown import MarkItDown
 load_dotenv()
 
 md = MarkItDown()
-BASE_MODEL = os.getenv("BASE_MODEL") or ""
+BASE_MODEL = os.getenv("BASE_MODEL") or "qwen/qwen3-235b-a22b-2507"
 
 
 @tool
