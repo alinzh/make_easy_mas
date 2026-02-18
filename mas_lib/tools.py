@@ -82,7 +82,7 @@ def describe_image(
     model = ChatOpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=os.getenv('OPENROUTER_API_KEY'),
-        model=os.getenv("VISION_MODEL", "mistralai/mistral-small-3.2-24b-instruct:free"),  # type: ignore
+        model=os.getenv("VISION_MODEL", "qwen/qwen3-vl-30b-a3b-thinking"),  # type: ignore
         temperature=0,
     )
 

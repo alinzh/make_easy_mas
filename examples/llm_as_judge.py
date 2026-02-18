@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from mas_lib.connectors.llm_connectors import get_llm_client
 
 load_dotenv(".env")
-MODEL = "meta-llama/llama-4-maverick"
+# MODEL = "meta-llama/llama-4-maverick"
+MODEL = "google/gemini-2.5-flash"
 llm = get_llm_client(model=MODEL, temperature=0.0)
 
 class TraceEval(BaseModel):
@@ -27,7 +28,7 @@ EVALUATION CRITERIA (analyze trace only):
 5. COMPLETENESS - Task fully resolved?
 
 TRACE ({len(obs)} steps):
-{obs}
+{str(obs)}
 
 DETAILED ANALYSIS REQUIRED:
 1. What was the task? (infer from first observation)
@@ -52,8 +53,14 @@ for f in Path("examples/traces").glob("*.json"):
     if obs:
         eval_result = validate_trace(obs)
         results.append({"file": f.name, "eval": eval_result.dict()})
-        print(f"{f.name}: {'CORRECT' if eval_result.correct else 'WRONG'} (conf: {eval_result.confidence:.2f})")
+        
+        print(f"\n{f.name}:")
+        print(f"Correct: {eval_result.correct}")
+        print(f"Confidence: {eval_result.confidence:.2f}")
+        print(f"Issues: {eval_result.issues}")
+        print(f"Explanation:\n{eval_result.explanation}")
 
 json.dump(results, open("validation.json", "w"), indent=2)
+
 correct_count = sum(r['eval']['correct'] for r in results)
 print(f"\n{correct_count}/{len(results)} correct ({correct_count/len(results)*100:.1f}%)")
